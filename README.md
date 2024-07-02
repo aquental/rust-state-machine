@@ -6,4 +6,5 @@ Basic blockchain implementation in Rust (based on Polkadot architecture).
 >
 > [Rust state machine](https://github.com/shawntabrizi/rust-state-machine)
 
-.........................
+........................
+
