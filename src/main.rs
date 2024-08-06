@@ -1,3 +1,6 @@
+mod balances;
+/* TODO: use your new module `balances` */
+
 fn main() {
-    println!("Hello, State Machine!");
+    println!("Hello, Rust State Machine!");
 }
