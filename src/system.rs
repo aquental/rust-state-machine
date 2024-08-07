@@ -40,6 +40,7 @@ impl Pallet {
     }
 
     //get nonce
+    #[cfg(test)]
     pub fn get_nonce(&self, who: &String) -> u32 {
         *self.nonce.get(who).unwrap_or(&0)
     }
