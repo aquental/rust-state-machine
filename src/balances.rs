@@ -23,6 +23,50 @@ impl Pallet {
         /* Return the balance of `who`, returning zero if `None`. */
         *self.balances.get(who).unwrap_or(&0)
     }
+    /// Transfer `amount` from one account to another.
+    /// This function verifies that `from` has at least `amount` balance to transfer,
+    /// and that no mathematical overflows occur.
+    pub fn transfer(
+        &mut self,
+        caller: String,
+        to: String,
+        amount: u128,
+    ) -> Result<(), &'static str> {
+        //Get the balance of account `caller`.
+        let caller_balance = self.balance(&caller);
+        println!("caller_balance: {}", caller_balance);
+        //Get the balance of account `to`.
+        let to_balance = self.balance(&to);
+        println!("to_balance: {}", to_balance);
+
+        //Use safe math to calculate a `new_caller_balance`.
+        let new_caller_balance = caller_balance
+            .checked_sub(amount)
+            .ok_or("insufficient balance");
+        if new_caller_balance.is_ok() {
+            println!("new_caller_balance: {}", new_caller_balance.unwrap());
+        } else {
+            println!("new_caller_balance: [insufficient balance!]");
+        }
+        //Use safe math to calculate a `new_to_balance`.
+        let new_to_balance = to_balance.checked_add(amount).ok_or(0);
+        if new_to_balance.is_ok() {
+            println!("new_to_balance: {}", new_to_balance.unwrap());
+        } else {
+            println!("new_to_balance: [overflow!]");
+        }
+
+        match (new_caller_balance, new_to_balance) {
+            (Ok(new_caller_balance), Ok(new_to_balance)) => {
+                //Insert the new balance of `caller`.
+                self.set_balance(&caller, new_caller_balance);
+                //Insert the new balance of `to`.
+                self.set_balance(&to, new_to_balance);
+                Ok(())
+            }
+            _ => Err("Error"),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -39,5 +83,23 @@ mod tests {
         assert_eq!(balances.balance(&"alice".to_string()), 100);
         /* TODO: Assert the balance of `bob` has not changed and is 0. */
         assert_eq!(balances.balance(&"bob".to_string()), 0);
+    }
+    #[test]
+    fn transfer_balance() {
+        let blc: u128 = 50;
+        let mut balances = super::Pallet::new();
+        // Create a test that checks the following:
+        // That `alice`(0) cannot transfer funds she does not have.
+        assert!(balances
+            .transfer("alice".to_string(), "bob".to_string(), blc)
+            .is_err());
+        // That `alice` can successfully transfer funds to `bob`.
+        balances.set_balance(&"alice".to_string(), blc * 2);
+        assert!(balances
+            .transfer("alice".to_string(), "bob".to_string(), blc)
+            .is_ok());
+        // That the balance of `alice` and `bob` is correctly updated.
+        assert_eq!(balances.balance(&"alice".to_string()), 100 - blc);
+        assert_eq!(balances.balance(&"bob".to_string()), blc);
     }
 }
