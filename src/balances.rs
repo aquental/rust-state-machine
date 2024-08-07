@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-#[warn(dead_code)]
+#[derive(Debug)]
 pub struct Pallet {
     // A simple storage mapping from accounts (`String`) to their balances (`u128`).
     balances: BTreeMap<String, u128>,
