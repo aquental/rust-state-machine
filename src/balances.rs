@@ -34,24 +34,32 @@ impl Pallet {
     ) -> Result<(), &'static str> {
         //Get the balance of account `caller`.
         let caller_balance = self.balance(&caller);
-        println!("caller_balance: {}", caller_balance);
+        println!(" [{}] caller_balance: {}", caller, caller_balance);
         //Get the balance of account `to`.
         let to_balance = self.balance(&to);
-        println!("to_balance: {}", to_balance);
+        println!(" [{}] to_balance: {}", to, to_balance);
 
         //Use safe math to calculate a `new_caller_balance`.
         let new_caller_balance = caller_balance
             .checked_sub(amount)
             .ok_or("insufficient balance");
         if new_caller_balance.is_ok() {
-            println!("new_caller_balance: {}", new_caller_balance.unwrap());
+            println!(
+                "new_caller_balance: ({})->{}",
+                caller_balance,
+                new_caller_balance.unwrap()
+            );
         } else {
             println!("new_caller_balance: [insufficient balance!]");
         }
         //Use safe math to calculate a `new_to_balance`.
         let new_to_balance = to_balance.checked_add(amount).ok_or(0);
         if new_to_balance.is_ok() {
-            println!("new_to_balance: {}", new_to_balance.unwrap());
+            println!(
+                "new_to_balance: ({})->{}",
+                to_balance,
+                new_to_balance.unwrap()
+            );
         } else {
             println!("new_to_balance: [overflow!]");
         }
