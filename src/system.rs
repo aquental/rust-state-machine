@@ -1,13 +1,24 @@
 use std::collections::BTreeMap;
+/*
+    TODO: Define the common types used in this pallet:
+        - `AccountID`
+        - `BlockNumber`
+        - `Nonce`
+
+    Then update this pallet to use these common types.
+*/
+type AccountID = String;
+type BlockNumber = u32;
+type Nonce = u32;
 
 /// This is the System Pallet.
 /// It handles low level state needed for your blockchain.
 #[derive(Debug)]
 pub struct Pallet {
     /// The current block number.
-    pub block_number: u32,
+    pub block_number: BlockNumber,
     /// A map from an account to their nonce.
-    pub nonce: BTreeMap<String, u32>,
+    pub nonce: BTreeMap<AccountID, Nonce>,
 }
 
 impl Pallet {
