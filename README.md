@@ -4,6 +4,8 @@ Basic blockchain implementation in Rust (based on Polkadot architecture).
 > [Web3Dev Build](https://build.w3d.community/)
 >
 > [Rust state machine](https://github.com/shawntabrizi/rust-state-machine)
+>
+> [Build](https://build.w3d.community/courses/Rust_State_Machine)
 
 ---
 
