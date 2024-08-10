@@ -1,20 +1,20 @@
-use num::traits::{CheckedAdd, CheckedSub, Zero};
-use std::collections::BTreeMap;
+use num::traits::{CheckedAdd, CheckedSub, One, Zero};
+use std::{collections::BTreeMap, ops::AddAssign};
 
+pub trait Config {
+    type AccountId: Ord + Clone + std::fmt::Debug;
+    type Balance: Zero + One + CheckedAdd + CheckedSub + Copy + AddAssign + std::fmt::Debug;
+}
 /// This is the Balances Module.
 /// It is a simple module which keeps track of how much balance each account has in this state
 /// machine.
 #[derive(Debug)]
-pub struct Pallet<AccountId, Balance> {
+pub struct Pallet<T: Config> {
     // A simple storage mapping from accounts (`String`/AccountID) to their balances (`u128`/Balance).
-    balances: BTreeMap<AccountId, Balance>,
+    balances: BTreeMap<T::AccountId, T::Balance>,
 }
 
-impl<AccountId, Balance> Pallet<AccountId, Balance>
-where
-    AccountId: Ord + Clone + std::fmt::Debug,
-    Balance: Zero + CheckedSub + CheckedAdd + Copy + std::fmt::Debug,
-{
+impl<T: Config> Pallet<T> {
     /// Create a new instance of the balances module.
     pub fn new() -> Self {
         Self {
@@ -22,24 +22,24 @@ where
         }
     }
     /// Set the balance of an account `who` to some `amount`.
-    pub fn set_balance(&mut self, who: AccountId, amount: Balance) {
+    pub fn set_balance(&mut self, who: T::AccountId, amount: T::Balance) {
         /* Insert `amount` into the BTreeMap under `who`. */
         self.balances.insert(who, amount);
     }
     /// Get the balance of an account `who`.
     /// If the account has no stored balance, we return zero.
-    pub fn balance(&self, who: AccountId) -> Balance {
+    pub fn balance(&self, who: T::AccountId) -> T::Balance {
         /* Return the balance of `who`, returning zero if `None`. */
-        *self.balances.get(&who).unwrap_or(&Balance::zero())
+        *self.balances.get(&who).unwrap_or(&T::Balance::zero())
     }
     /// Transfer `amount` from one account to another.
     /// This function verifies that `from` has at least `amount` balance to transfer,
     /// and that no mathematical overflows occur.
     pub fn transfer(
         &mut self,
-        caller: AccountId,
-        to: AccountId,
-        amount: Balance,
+        caller: T::AccountId,
+        to: T::AccountId,
+        amount: T::Balance,
     ) -> Result<(), &'static str> {
         //Get the balance of account `caller`.
         let caller_balance = self.balance(caller.clone());
@@ -53,11 +53,11 @@ where
             .checked_sub(&amount)
             .ok_or("insufficient balance");
         if new_caller_balance.is_ok() {
-            // println!(
-            //     "new_caller_balance: ({:?})->{:?}",
-            //     caller_balance,
-            //     new_caller_balance.unwrap()
-            // );
+            println!(
+                "new_caller_balance: ({:?})->{:?}",
+                caller_balance,
+                new_caller_balance.unwrap()
+            );
         } else {
             println!("new_caller_balance: [insufficient balance!]");
         }
@@ -88,24 +88,29 @@ where
 
 #[cfg(test)]
 mod tests {
+    struct TestConfig;
+    impl super::Config for TestConfig {
+        type AccountId = String;
+        type Balance = u128;
+    }
     #[test]
     fn init_balances() {
         /* TODO: Create a mutable variable `balances`, which is a new instance of `Pallet`. */
-        let mut balances = super::Pallet::new();
+        let mut balances: super::Pallet<TestConfig> = super::Pallet::new();
         /* TODO: Assert that the balance of `alice` starts at zero. */
-        assert_eq!(balances.balance(&"alice".to_string()), 0);
+        assert_eq!(balances.balance("alice".to_string()), 0);
         /* TODO: Set the balance of `alice` to 100. */
         let alice = "alice".to_string();
-        balances.set_balance(&&alice, 100);
+        balances.set_balance(alice, 100);
         /* TODO: Assert the balance of `alice` is now 100. */
-        assert_eq!(balances.balance(&"alice".to_string()), 100);
+        assert_eq!(balances.balance("alice".to_string()), 100);
         /* TODO: Assert the balance of `bob` has not changed and is 0. */
-        assert_eq!(balances.balance(&"bob".to_string()), 0);
+        assert_eq!(balances.balance("bob".to_string()), 0);
     }
     #[test]
     fn transfer_balance() {
         let blc: u128 = 50;
-        let mut balances = super::Pallet::new();
+        let mut balances: super::Pallet<TestConfig> = super::Pallet::new();
         // Create a test that checks the following:
         // That `alice`(0) cannot transfer funds she does not have.
         assert!(balances
