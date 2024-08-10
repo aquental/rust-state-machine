@@ -1,6 +1,10 @@
 mod balances;
 mod system;
 
+mod types {
+    pub type AccountId = String;
+    pub type Balance = u128;
+}
 // This is our main Runtime.
 // It accumulates all of the different pallets we want to use.
 #[derive(Debug)]
@@ -8,7 +12,7 @@ pub struct Runtime {
     /// field `system` of type `system::Pallet`.
     pub system: system::Pallet,
     /// field `balances` of type `balances::Pallet`.
-    pub balances: balances::Pallet,
+    pub balances: balances::Pallet<types::AccountId, types::Balance>,
 }
 
 impl Runtime {
@@ -25,7 +29,7 @@ fn main() {
     /* TODO: Create a mutable variable `runtime`, which is a new instance of `Runtime`. */
     let mut runtime = Runtime::new();
     /* TODO: Set the balance of `alice` to 100, allowing us to execute other transactions. */
-    runtime.balances.set_balance(&"alice".to_string(), 100);
+    runtime.balances.set_balance("alice".to_string(), 100);
 
     // start emulating a block
     /* TODO: Increment the block number in system. */
