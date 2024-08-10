@@ -10,7 +10,7 @@ mod types {
 #[derive(Debug)]
 pub struct Runtime {
     /// field `system` of type `system::Pallet`.
-    pub system: system::Pallet,
+    pub system: system::Pallet<String, u32, u32>,
     /// field `balances` of type `balances::Pallet`.
     pub balances: balances::Pallet<types::AccountId, types::Balance>,
 }
@@ -44,7 +44,7 @@ fn main() {
 
     // first transaction
     /* TODO: Increment the nonce of `alice`. */
-    runtime.system.inc_nonce(&"alice".to_string());
+    runtime.system.inc_nonce("alice".to_string());
     /* TODO: Execute a transfer from `alice` to `bob` for 30 tokens.
         - The transfer _could_ return an error. We should use `map_err` to print
           the error if there is one.
@@ -57,7 +57,7 @@ fn main() {
 
     // second transaction
     /* TODO: Increment the nonce of `alice` again. */
-    runtime.system.inc_nonce(&"alice".to_string());
+    runtime.system.inc_nonce("alice".to_string());
     /* TODO: Execute another balance transfer, this time from `alice` to `charlie` for 20. */
     let _result = runtime
         .balances
