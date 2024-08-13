@@ -135,6 +135,32 @@ fn main() {
 
     runtime.execute_block(block_1).expect("invalid block");
 
+    /*
+        TODO:
+        Create new block(s) which execute extrinsics for the new `ProofOfExistence` pallet.
+            - Make sure to set the block number correctly.
+            - Feel free to allow some extrinsics to fail, and see the errors appear.
+    */
+
+    let block_2 = types::Block {
+        header: support::Header { block_number: 2 },
+        extrinsics: vec![
+            support::Extrinsic {
+                caller: alice.clone(),
+                call: RuntimeCall::ProofOfExistence(proof_of_existence::Call::CreateClaim {
+                    claim: "my_document",
+                }),
+            },
+            support::Extrinsic {
+                caller: bob.clone(),
+                call: RuntimeCall::ProofOfExistence(proof_of_existence::Call::CreateClaim {
+                    claim: "Bob's document",
+                }),
+            },
+        ],
+    };
+
+    runtime.execute_block(block_2).expect("invalid block");
     // Simply print the debug format of our runtime state.
     println!("{:#?}", runtime);
 }
