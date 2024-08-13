@@ -5,9 +5,8 @@ mod system;
 
 use crate::support::Dispatch;
 
-// These are the concrete types we will use in our simple state machine.
-// Modules are configured for these types directly, and they satisfy all of our
-// trait requirements.
+/// The `mod types { ... }` block in the Rust code snippet is defining a module named `types` that
+/// contains several type aliases. Here's what each alias represents:
 mod types {
     pub type AccountId = String;
     pub type Balance = u128;
@@ -46,6 +45,8 @@ impl proof_of_existence::Config for Runtime {
 }
 
 // The main entry point for our simple state machine.
+/// The function simulates a blockchain runtime with extrinsics for transferring balances and
+/// creating/revoke claims, executing multiple blocks and printing the runtime state.
 fn main() {
     // Create a new instance of the Runtime.
     // It will instantiate with it all the modules it uses.
@@ -79,37 +80,43 @@ fn main() {
         ],
     };
 
+    // This code snippet is defining `block_2` as an instance of the `types::Block` struct. It
+    // represents a block in a blockchain simulation with a specific block number and a list of
+    // extrinsics (transactions) to be executed within that block.
     let block_2 = types::Block {
         header: support::Header { block_number: 2 },
         extrinsics: vec![
             support::Extrinsic {
                 caller: alice.clone(),
                 call: RuntimeCall::proof_of_existence(proof_of_existence::Call::create_claim {
-                    claim: &"Hello, world!",
+                    claim: &"Alice's document",
                 }),
             },
             support::Extrinsic {
                 caller: bob.clone(),
                 call: RuntimeCall::proof_of_existence(proof_of_existence::Call::create_claim {
-                    claim: &"Hello, world!",
+                    claim: &"Bob's document",
                 }),
             },
         ],
     };
 
+    // The `let block_3 = types::Block { ... }` code snippet is defining `block_3` as an instance of the
+    // `types::Block` struct. This block represents a specific block in a blockchain simulation with a
+    // block number of 3 and a list of extrinsics (transactions) to be executed within that block.
     let block_3 = types::Block {
         header: support::Header { block_number: 3 },
         extrinsics: vec![
             support::Extrinsic {
                 caller: alice,
                 call: RuntimeCall::proof_of_existence(proof_of_existence::Call::revoke_claim {
-                    claim: &"Hello, world!",
+                    claim: &"Alice's document",
                 }),
             },
             support::Extrinsic {
                 caller: bob,
                 call: RuntimeCall::proof_of_existence(proof_of_existence::Call::create_claim {
-                    claim: &"Hello, world!",
+                    claim: &"Bob's new document",
                 }),
             },
         ],

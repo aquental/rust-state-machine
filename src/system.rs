@@ -42,14 +42,14 @@ impl<T: Config> Pallet<T> {
         self.block_number
     }
 
-    // This function can be used to increment the block number.
-    // Increases the block number by one.
+    /// This function can be used to increment the block number.
     pub fn inc_block_number(&mut self) {
+        // Increases the block number by one.
         self.block_number += T::BlockNumber::one();
     }
 
-    // Increment the nonce of an account. This helps us keep track of how many transactions each
-    // account has made.
+    /// Increment the nonce of an account. This helps us keep track of how many transactions each
+    /// account has made.
     pub fn inc_nonce(&mut self, who: &T::AccountId) {
         let nonce = *self.nonce.get(&who).unwrap_or(&T::Nonce::zero());
         let new_nonce = nonce + T::Nonce::one();
@@ -58,6 +58,8 @@ impl<T: Config> Pallet<T> {
 }
 
 #[cfg(test)]
+/// The `mod test { ... }` block in the code is a module named `test` that contains unit tests for the
+/// functionality provided by the System Pallet implementation. Here's a breakdown of what it does:
 mod test {
     struct TestConfig;
     impl super::Config for TestConfig {
