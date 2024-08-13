@@ -112,14 +112,14 @@ fn main() {
                 caller: alice.clone(),
                 call: RuntimeCall::BalancesTransfer {
                     to: bob.clone(),
-                    amount: 69,
+                    amount: 30,
                 },
             },
             support::Extrinsic {
                 caller: alice.clone(),
                 call: RuntimeCall::BalancesTransfer {
                     to: charlie.clone(),
-                    amount: 69,
+                    amount: 20,
                 },
             },
         ],
