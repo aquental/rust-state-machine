@@ -17,28 +17,6 @@ pub struct Pallet<T: Config> {
     // A simple storage mapping from accounts to their balances.
     balances: BTreeMap<T::AccountId, T::Balance>,
 }
-#[macros::call]
-impl<T: Config> Pallet<T> {
-    pub fn transfer(
-        &mut self,
-        caller: T::AccountId,
-        to: T::AccountId,
-        amount: T::Balance,
-    ) -> crate::support::DispatchResult {
-        let caller_balance = self.balance(&caller);
-        let to_balance = self.balance(&to);
-
-        let new_caller_balance = caller_balance
-            .checked_sub(&amount)
-            .ok_or("Not enough funds.")?;
-        let new_to_balance = to_balance.checked_add(&amount).ok_or("Overflow")?;
-
-        self.balances.insert(caller, new_caller_balance);
-        self.balances.insert(to, new_to_balance);
-
-        Ok(())
-    }
-}
 
 impl<T: Config> Pallet<T> {
     // Create a new instance of the balances module.
@@ -57,6 +35,32 @@ impl<T: Config> Pallet<T> {
     /// If the account has no stored balance, we return zero.
     pub fn balance(&self, who: &T::AccountId) -> T::Balance {
         *self.balances.get(who).unwrap_or(&T::Balance::zero())
+    }
+}
+
+#[macros::call]
+impl<T: Config> Pallet<T> {
+    /// Transfer `amount` from one account to another.
+    /// This function verifies that `from` has at least `amount` balance to transfer,
+    /// and that no mathematical overflows occur.
+    pub fn transfer(
+        &mut self,
+        caller: T::AccountId,
+        to: T::AccountId,
+        amount: T::Balance,
+    ) -> crate::support::DispatchResult {
+        let caller_balance = self.balance(&caller);
+        let to_balance = self.balance(&to);
+
+        let new_caller_balance = caller_balance
+            .checked_sub(&amount)
+            .ok_or("Not enough funds.")?;
+        let new_to_balance = to_balance.checked_add(&amount).ok_or("Overflow")?;
+
+        self.balances.insert(caller, new_caller_balance);
+        self.balances.insert(to, new_to_balance);
+
+        Ok(())
     }
 }
 
