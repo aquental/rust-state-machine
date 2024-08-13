@@ -15,7 +15,43 @@ mod types {
 }
 
 pub enum RuntimeCall {
-    // TODO: Not implemented yet.
+    BalancesTransfer {
+        to: types::AccountId,
+        amount: types::Balance,
+    },
+}
+
+impl crate::support::Dispatch for Runtime {
+    type Caller = <Runtime as system::Config>::AccountId;
+    type Call = RuntimeCall;
+    // Dispatch a call on behalf of a caller. Increments the caller's nonce.
+    //
+    // Dispatch allows us to identify which underlying module call we want to execute.
+    // Note that we extract the `caller` from the extrinsic, and use that information
+    // to determine who we are executing the call on behalf of.
+    fn dispatch(
+        &mut self,
+        caller: Self::Caller,
+        runtime_call: Self::Call,
+    ) -> support::DispatchResult {
+        match runtime_call {
+            RuntimeCall::BalancesTransfer { to, amount } => {
+                self.balances.transfer(caller, to, amount)?;
+            }
+        }
+        /*
+            TODO:
+            Use a match statement to route the `runtime_call` to call the appropriate function in
+            our pallet. In this case, there is only `self.balances.transfer`.
+
+            Your `runtime_call` won't contain the caller information which is needed to make the
+            `transfer` call, but you have that information from the arguments to the `dispatch`
+            function.
+
+            You should propagate any errors from the call back up this function.
+        */
+        Ok(())
+    }
 }
 
 impl system::Config for Runtime {
