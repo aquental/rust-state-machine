@@ -39,17 +39,6 @@ impl crate::support::Dispatch for Runtime {
                 self.balances.transfer(caller, to, amount)?;
             }
         }
-        /*
-            TODO:
-            Use a match statement to route the `runtime_call` to call the appropriate function in
-            our pallet. In this case, there is only `self.balances.transfer`.
-
-            Your `runtime_call` won't contain the caller information which is needed to make the
-            `transfer` call, but you have that information from the arguments to the `dispatch`
-            function.
-
-            You should propagate any errors from the call back up this function.
-        */
         Ok(())
     }
 }
