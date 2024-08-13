@@ -27,7 +27,7 @@ impl crate::support::Dispatch for Runtime {
     type Caller = <Runtime as system::Config>::AccountId;
     type Call = RuntimeCall;
     // Dispatch a call on behalf of a caller. Increments the caller's nonce.
-    //
+
     // Dispatch allows us to identify which underlying module call we want to execute.
     // Note that we extract the `caller` from the extrinsic, and use that information
     // to determine who we are executing the call on behalf of.
@@ -134,13 +134,6 @@ fn main() {
     };
 
     runtime.execute_block(block_1).expect("invalid block");
-
-    /*
-        TODO:
-        Create new block(s) which execute extrinsics for the new `ProofOfExistence` pallet.
-            - Make sure to set the block number correctly.
-            - Feel free to allow some extrinsics to fail, and see the errors appear.
-    */
 
     let block_2 = types::Block {
         header: support::Header { block_number: 2 },
