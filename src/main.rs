@@ -1,3 +1,5 @@
+use support::Dispatch;
+
 mod balances;
 mod support;
 mod system;
@@ -65,55 +67,66 @@ pub struct Runtime {
 impl Runtime {
     // Create a new instance of the main Runtime, by creating a new instance of each pallet.
     fn new() -> Self {
-        // Return a new `Runtime` by creating new instances of `system` and `balances`.
-        let system = system::Pallet::new();
-        let balances = balances::Pallet::new();
-        Self { system, balances }
+        Self {
+            system: system::Pallet::new(),
+            balances: balances::Pallet::new(),
+        }
+    }
+
+    // Execute a block of extrinsics. Increments the block number.
+    fn execute_block(&mut self, block: types::Block) -> support::DispatchResult {
+        self.system.inc_block_number();
+        if block.header.block_number != self.system.block_number() {
+            return Err(&"block number does not match what is expected");
+        }
+        // An extrinsic error is not enough to trigger the block to be invalid. We capture the
+        // result, and emit an error message if one is emitted.
+        for (i, support::Extrinsic { caller, call }) in block.extrinsics.into_iter().enumerate() {
+            self.system.inc_nonce(caller.clone());
+            let _res = self.dispatch(caller, call).map_err(|e| {
+                eprintln!(
+                    "Extrinsic Error\n\tBlock Number: {}\n\tExtrinsic Number: {}\n\tError: {}",
+                    block.header.block_number, i, e
+                )
+            });
+        }
+        Ok(())
     }
 }
 
 fn main() {
+    // Create a new instance of the Runtime.
+    // It will instantiate with it all the modules it uses.
     let mut runtime = Runtime::new();
-
     let alice = "alice".to_string();
     let bob = "bob".to_string();
     let charlie = "charlie".to_string();
 
-    runtime.balances.set_balance("alice".to_string(), 100);
+    // Initialize the system with some initial balance.
+    runtime.balances.set_balance(alice.clone(), 100);
 
-    // start emulating a block
-    /* TODO: Increment the block number in system. */
-    runtime.system.inc_block_number();
-    /* TODO: Assert the block number is what we expect. */
-    let bn = runtime.system.block_number();
-    if bn == 1 {
-        println!("Block number is: {} [ok]", bn);
-    } else {
-        panic!("Block number is: {}", bn);
-    }
+    let block_1 = types::Block {
+        header: support::Header { block_number: 1 },
+        extrinsics: vec![
+            support::Extrinsic {
+                caller: alice.clone(),
+                call: RuntimeCall::BalancesTransfer {
+                    to: bob.clone(),
+                    amount: 69,
+                },
+            },
+            support::Extrinsic {
+                caller: alice.clone(),
+                call: RuntimeCall::BalancesTransfer {
+                    to: charlie.clone(),
+                    amount: 69,
+                },
+            },
+        ],
+    };
 
-    // first transaction
+    runtime.execute_block(block_1).expect("invalid block");
 
-    /* TODO: Increment the nonce of `alice`. */
-    runtime.system.inc_nonce(alice.clone());
-    /* TODO: Execute a transfer from `alice` to `bob` for 30 tokens.
-        - The transfer _could_ return an error. We should use `map_err` to print
-          the error if there is one.
-        - We should capture the result of the transfer in an unused variable like `_res`.
-    */
-    let _result = runtime
-        .balances
-        .transfer(alice.clone(), bob.clone(), 30)
-        .map_err(|e| eprintln!("{}", e));
-
-    // second transaction
-    /* TODO: Increment the nonce of `alice` again. */
-    runtime.system.inc_nonce(alice.clone());
-    /* TODO: Execute another balance transfer, this time from `alice` to `charlie` for 20. */
-    let _result = runtime
-        .balances
-        .transfer(alice, charlie, 20)
-        .map_err(|e| eprintln!("{}", e));
-
-    print!("{:#?}", runtime);
+    // Simply print the debug format of our runtime state.
+    println!("{:#?}", runtime);
 }
